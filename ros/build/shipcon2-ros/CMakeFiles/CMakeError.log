@@ -1,0 +1,55 @@
+Determining if the pthread_create exist failed with the following output:
+Change Dir: /media/suisei/Data/data/projects/shipcon2/ros/build/shipcon2-ros/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_fa740/fast"
+/usr/bin/make -f CMakeFiles/cmTC_fa740.dir/build.make CMakeFiles/cmTC_fa740.dir/build
+make[1]: ディレクトリ '/media/suisei/Data/data/projects/shipcon2/ros/build/shipcon2-ros/CMakeFiles/CMakeTmp' に入ります
+Building C object CMakeFiles/cmTC_fa740.dir/CheckSymbolExists.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_fa740.dir/CheckSymbolExists.c.o   -c /media/suisei/Data/data/projects/shipcon2/ros/build/shipcon2-ros/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+Linking C executable cmTC_fa740
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_fa740.dir/link.txt --verbose=1
+/usr/bin/cc      CMakeFiles/cmTC_fa740.dir/CheckSymbolExists.c.o  -o cmTC_fa740 
+CMakeFiles/cmTC_fa740.dir/CheckSymbolExists.c.o: 関数 `main' 内:
+CheckSymbolExists.c:(.text+0x1b): `pthread_create' に対する定義されていない参照です
+collect2: error: ld returned 1 exit status
+CMakeFiles/cmTC_fa740.dir/build.make:97: recipe for target 'cmTC_fa740' failed
+make[1]: *** [cmTC_fa740] Error 1
+make[1]: ディレクトリ '/media/suisei/Data/data/projects/shipcon2/ros/build/shipcon2-ros/CMakeFiles/CMakeTmp' から出ます
+Makefile:126: recipe for target 'cmTC_fa740/fast' failed
+make: *** [cmTC_fa740/fast] Error 2
+
+File /media/suisei/Data/data/projects/shipcon2/ros/build/shipcon2-ros/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <pthread.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef pthread_create
+  return ((int*)(&pthread_create))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /media/suisei/Data/data/projects/shipcon2/ros/build/shipcon2-ros/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_15a19/fast"
+/usr/bin/make -f CMakeFiles/cmTC_15a19.dir/build.make CMakeFiles/cmTC_15a19.dir/build
+make[1]: ディレクトリ '/media/suisei/Data/data/projects/shipcon2/ros/build/shipcon2-ros/CMakeFiles/CMakeTmp' に入ります
+Building C object CMakeFiles/cmTC_15a19.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_15a19.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.10/Modules/CheckFunctionExists.c
+Linking C executable cmTC_15a19
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_15a19.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    CMakeFiles/cmTC_15a19.dir/CheckFunctionExists.c.o  -o cmTC_15a19 -lpthreads 
+/usr/bin/ld: -lpthreads が見つかりません
+collect2: error: ld returned 1 exit status
+CMakeFiles/cmTC_15a19.dir/build.make:97: recipe for target 'cmTC_15a19' failed
+make[1]: *** [cmTC_15a19] Error 1
+make[1]: ディレクトリ '/media/suisei/Data/data/projects/shipcon2/ros/build/shipcon2-ros/CMakeFiles/CMakeTmp' から出ます
+Makefile:126: recipe for target 'cmTC_15a19/fast' failed
+make: *** [cmTC_15a19/fast] Error 2
+
+

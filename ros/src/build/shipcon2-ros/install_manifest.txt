@@ -1,0 +1,16 @@
+/media/suisei/Data/data/projects/shipcon2/ros/src/install/shipcon2-ros/lib/shipcon2-ros/talker
+/media/suisei/Data/data/projects/shipcon2/ros/src/install/shipcon2-ros/share/ament_index/resource_index/package_run_dependencies/shipcon2-ros
+/media/suisei/Data/data/projects/shipcon2/ros/src/install/shipcon2-ros/share/ament_index/resource_index/parent_prefix_path/shipcon2-ros
+/media/suisei/Data/data/projects/shipcon2/ros/src/install/shipcon2-ros/share/shipcon2-ros/environment/ament_prefix_path.sh
+/media/suisei/Data/data/projects/shipcon2/ros/src/install/shipcon2-ros/share/shipcon2-ros/environment/ament_prefix_path.dsv
+/media/suisei/Data/data/projects/shipcon2/ros/src/install/shipcon2-ros/share/shipcon2-ros/environment/path.sh
+/media/suisei/Data/data/projects/shipcon2/ros/src/install/shipcon2-ros/share/shipcon2-ros/environment/path.dsv
+/media/suisei/Data/data/projects/shipcon2/ros/src/install/shipcon2-ros/share/shipcon2-ros/local_setup.bash
+/media/suisei/Data/data/projects/shipcon2/ros/src/install/shipcon2-ros/share/shipcon2-ros/local_setup.sh
+/media/suisei/Data/data/projects/shipcon2/ros/src/install/shipcon2-ros/share/shipcon2-ros/local_setup.zsh
+/media/suisei/Data/data/projects/shipcon2/ros/src/install/shipcon2-ros/share/shipcon2-ros/local_setup.dsv
+/media/suisei/Data/data/projects/shipcon2/ros/src/install/shipcon2-ros/share/shipcon2-ros/package.dsv
+/media/suisei/Data/data/projects/shipcon2/ros/src/install/shipcon2-ros/share/ament_index/resource_index/packages/shipcon2-ros
+/media/suisei/Data/data/projects/shipcon2/ros/src/install/shipcon2-ros/share/shipcon2-ros/cmake/shipcon2-rosConfig.cmake
+/media/suisei/Data/data/projects/shipcon2/ros/src/install/shipcon2-ros/share/shipcon2-ros/cmake/shipcon2-rosConfig-version.cmake
+/media/suisei/Data/data/projects/shipcon2/ros/src/install/shipcon2-ros/share/shipcon2-ros/package.xml

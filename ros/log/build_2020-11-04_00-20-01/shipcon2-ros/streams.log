@@ -1,0 +1,72 @@
+[0.021s] Invoking command in '/media/suisei/Data/data/projects/shipcon2/ros/build/shipcon2-ros': CMAKE_PREFIX_PATH=/opt/ros/eloquent /usr/bin/cmake /media/suisei/Data/data/projects/shipcon2/ros/src/shipcon2-ros -DCMAKE_INSTALL_PREFIX=/media/suisei/Data/data/projects/shipcon2/ros/install/shipcon2-ros
+[0.110s] -- The C compiler identification is GNU 7.5.0
+[0.191s] -- The CXX compiler identification is GNU 7.5.0
+[0.199s] -- Check for working C compiler: /usr/bin/cc
+[0.324s] -- Check for working C compiler: /usr/bin/cc -- works
+[0.326s] -- Detecting C compiler ABI info
+[0.454s] -- Detecting C compiler ABI info - done
+[0.464s] -- Detecting C compile features
+[0.849s] -- Detecting C compile features - done
+[0.854s] -- Check for working CXX compiler: /usr/bin/c++
+[0.992s] -- Check for working CXX compiler: /usr/bin/c++ -- works
+[0.993s] -- Detecting CXX compiler ABI info
+[1.133s] -- Detecting CXX compiler ABI info - done
+[1.140s] -- Detecting CXX compile features
+[1.830s] -- Detecting CXX compile features - done
+[1.834s] -- Found ament_cmake: 0.8.2 (/opt/ros/eloquent/share/ament_cmake/cmake)
+[1.881s] -- Found PythonInterp: /usr/bin/python3 (found suitable version "3.6.9", minimum required is "3") 
+[1.881s] -- Using PYTHON_EXECUTABLE: /usr/bin/python3
+[2.143s] -- Found rclcpp: 0.8.4 (/opt/ros/eloquent/share/rclcpp/cmake)
+[2.166s] -- Found rosidl_adapter: 0.8.2 (/opt/ros/eloquent/share/rosidl_adapter/cmake)
+[2.219s] -- Found rmw_implementation_cmake: 0.8.1 (/opt/ros/eloquent/share/rmw_implementation_cmake/cmake)
+[2.220s] -- Using RMW implementation 'rmw_fastrtps_cpp' as default
+[2.222s] -- Looking for pthread.h
+[2.350s] -- Looking for pthread.h - found
+[2.352s] -- Looking for pthread_create
+[2.484s] -- Looking for pthread_create - not found
+[2.484s] -- Looking for pthread_create in pthreads
+[2.590s] -- Looking for pthread_create in pthreads - not found
+[2.591s] -- Looking for pthread_create in pthread
+[2.714s] -- Looking for pthread_create in pthread - found
+[2.716s] -- Found Threads: TRUE  
+[2.764s] -- Found std_msgs: 0.8.1 (/opt/ros/eloquent/share/std_msgs/cmake)
+[2.794s] -- Found ament_lint_auto: 0.8.1 (/opt/ros/eloquent/share/ament_lint_auto/cmake)
+[2.912s] -- Added test 'copyright' to check for copyright in CMake / C / C++ / Python code
+[2.922s] -- Added test 'cppcheck' to perform static code analysis on C / C++ code
+[2.922s] -- Configured cppcheck include dirs: 
+[2.932s] -- Added test 'cpplint' to check C / C++ code against the Google style
+[2.937s] -- Added test 'lint_cmake' to check CMake code style
+[2.948s] -- Added test 'uncrustify' to check C / C++ code style
+[2.950s] -- Added test 'xmllint' to check XML markup files
+[2.955s] -- Configuring done
+[2.976s] -- Generating done
+[2.981s] -- Build files have been written to: /media/suisei/Data/data/projects/shipcon2/ros/build/shipcon2-ros
+[2.985s] Invoked command in '/media/suisei/Data/data/projects/shipcon2/ros/build/shipcon2-ros' returned '0': CMAKE_PREFIX_PATH=/opt/ros/eloquent /usr/bin/cmake /media/suisei/Data/data/projects/shipcon2/ros/src/shipcon2-ros -DCMAKE_INSTALL_PREFIX=/media/suisei/Data/data/projects/shipcon2/ros/install/shipcon2-ros
+[2.991s] Invoking command in '/media/suisei/Data/data/projects/shipcon2/ros/build/shipcon2-ros': CMAKE_PREFIX_PATH=/opt/ros/eloquent /usr/bin/cmake --build /media/suisei/Data/data/projects/shipcon2/ros/build/shipcon2-ros -- -j24 -l24
+[3.071s] [35m[1mScanning dependencies of target talker[0m
+[3.221s] [ 50%] [32mBuilding CXX object CMakeFiles/talker.dir/src/test.cpp.o[0m
+[5.749s] [100%] [32m[1mLinking CXX executable talker[0m
+[5.970s] [100%] Built target talker
+[5.992s] Invoked command in '/media/suisei/Data/data/projects/shipcon2/ros/build/shipcon2-ros' returned '0': CMAKE_PREFIX_PATH=/opt/ros/eloquent /usr/bin/cmake --build /media/suisei/Data/data/projects/shipcon2/ros/build/shipcon2-ros -- -j24 -l24
+[6.056s] Invoking command in '/media/suisei/Data/data/projects/shipcon2/ros/build/shipcon2-ros': CMAKE_PREFIX_PATH=/opt/ros/eloquent /usr/bin/cmake --build /media/suisei/Data/data/projects/shipcon2/ros/build/shipcon2-ros --target install -- -j24 -l24
+[6.156s] [100%] Built target talker
+[6.186s] [36mInstall the project...[0m
+[6.201s] -- Install configuration: ""
+[6.202s] -- Installing: /media/suisei/Data/data/projects/shipcon2/ros/install/shipcon2-ros/lib/shipcon2-ros/talker
+[6.213s] -- Set runtime path of "/media/suisei/Data/data/projects/shipcon2/ros/install/shipcon2-ros/lib/shipcon2-ros/talker" to ""
+[6.213s] -- Installing: /media/suisei/Data/data/projects/shipcon2/ros/install/shipcon2-ros/share/ament_index/resource_index/package_run_dependencies/shipcon2-ros
+[6.214s] -- Installing: /media/suisei/Data/data/projects/shipcon2/ros/install/shipcon2-ros/share/ament_index/resource_index/parent_prefix_path/shipcon2-ros
+[6.215s] -- Installing: /media/suisei/Data/data/projects/shipcon2/ros/install/shipcon2-ros/share/shipcon2-ros/environment/ament_prefix_path.sh
+[6.216s] -- Installing: /media/suisei/Data/data/projects/shipcon2/ros/install/shipcon2-ros/share/shipcon2-ros/environment/ament_prefix_path.dsv
+[6.216s] -- Installing: /media/suisei/Data/data/projects/shipcon2/ros/install/shipcon2-ros/share/shipcon2-ros/environment/path.sh
+[6.217s] -- Installing: /media/suisei/Data/data/projects/shipcon2/ros/install/shipcon2-ros/share/shipcon2-ros/environment/path.dsv
+[6.218s] -- Installing: /media/suisei/Data/data/projects/shipcon2/ros/install/shipcon2-ros/share/shipcon2-ros/local_setup.bash
+[6.219s] -- Installing: /media/suisei/Data/data/projects/shipcon2/ros/install/shipcon2-ros/share/shipcon2-ros/local_setup.sh
+[6.220s] -- Installing: /media/suisei/Data/data/projects/shipcon2/ros/install/shipcon2-ros/share/shipcon2-ros/local_setup.zsh
+[6.220s] -- Installing: /media/suisei/Data/data/projects/shipcon2/ros/install/shipcon2-ros/share/shipcon2-ros/local_setup.dsv
+[6.221s] -- Installing: /media/suisei/Data/data/projects/shipcon2/ros/install/shipcon2-ros/share/shipcon2-ros/package.dsv
+[6.222s] -- Installing: /media/suisei/Data/data/projects/shipcon2/ros/install/shipcon2-ros/share/ament_index/resource_index/packages/shipcon2-ros
+[6.223s] -- Installing: /media/suisei/Data/data/projects/shipcon2/ros/install/shipcon2-ros/share/shipcon2-ros/cmake/shipcon2-rosConfig.cmake
+[6.224s] -- Installing: /media/suisei/Data/data/projects/shipcon2/ros/install/shipcon2-ros/share/shipcon2-ros/cmake/shipcon2-rosConfig-version.cmake
+[6.225s] -- Installing: /media/suisei/Data/data/projects/shipcon2/ros/install/shipcon2-ros/share/shipcon2-ros/package.xml
+[6.230s] Invoked command in '/media/suisei/Data/data/projects/shipcon2/ros/build/shipcon2-ros' returned '0': CMAKE_PREFIX_PATH=/opt/ros/eloquent /usr/bin/cmake --build /media/suisei/Data/data/projects/shipcon2/ros/build/shipcon2-ros --target install -- -j24 -l24
