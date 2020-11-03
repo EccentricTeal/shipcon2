@@ -8,7 +8,7 @@ This is experiment assist eco-systems for free-run model ship.<br>
 Shipcon, which is previous system, was implemented with poor knowledge about ROS.<br>
 So we are refactorring first Shipcon, aimed to add more function.<br>
 Main feature of Shipcon2 is:
-* Change base system from ROS1 to ROS2.
-* Separate common function of connection between hardware and software, and make it into libraries.
-* Refactorred programs to more strict object-oriented style. 
+* Applying ROS2 as base system of the system.
+* Separating common function of connection between hardware and software, and make it into libraries.
+* Refactoring the programs to more strict object-oriented style. 
 
