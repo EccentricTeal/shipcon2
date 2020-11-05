@@ -1,5 +1,5 @@
-#ifndef ETHCOM_DEFINE_HPP
-#define ETHCOM_DEFINE_HPP
+#ifndef ETHCOM_SOCKET_HPP
+#define ETHCOM_SOCKET_HPP
 
 #include <string>
 #include <netinet/in.h>
@@ -21,19 +21,3 @@ private:
 };
 
 #endif
-
-
-EthcomSocketClass::EthcomSocketClass()
-{
-    ;
-}
-
-EthcomSocketClass::~EthcomSocketClass()
-{
-    ;
-}
-
-EthcomSocketClass::setIpAddr( std::string ip_addr )
-{
-    ;
-}

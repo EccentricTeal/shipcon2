@@ -11,6 +11,7 @@
  * @note
  */
 
+#include <string>
 
 /**
  * Core class for ethernet communication as server
@@ -20,10 +21,13 @@ class EthernetServer
 public:
     EthernetServer(/* args */);
     ~EthernetServer();
+    void setMyIpAddr ( std::string ip_addr);
         
 private:
-    int init( void );
-    void setMyIpAddr ()
+    int init( void );    
+    int send_udp( int send_port, std::string dest_ip, std::string send_data );
+    int recieve_udp( std::string src_ip, std::string* msg );
+    
 
 
 };
