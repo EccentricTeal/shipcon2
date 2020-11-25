@@ -44,6 +44,7 @@ int32_t UdpSendClass::sendData( std::string send_data )
 
 
 
+
 UdpRecvClass::UdpRecvClass( uint16_t udp_port ):
 iosrv_ptr_( new boost::asio::io_service )
 {
@@ -59,11 +60,31 @@ UdpRecvClass::~UdpRecvClass()
 }
 
 
-std::tuple<size_t, std::string> UdpRecvClass::recvData( std::string src_ip, std::string* buffer )
+std::tuple<size_t, std::string> UdpRecvClass::recvData( std::string src_ip )
 {
+    /* Local Variables Declaration */
     boost::asio::ip::udp::endpoint src_endpoint;
+    std::string recv_ipaddr;
+    std::vector<char> buffer;
 
-    size_t sent = socket_ptr_->receive_from( boost::asio::buffer(recvbuf_), src_endpoint );
+    /* Initializing Local Variables */
+    buffer.clear();
 
-    return std::make_tuple( sent, src_endpoint.address().to_string() );
+    /* Receive UDP Message (Block) */
+    size_t sent = socket_ptr_->receive_from( boost::asio::buffer(buffer), src_endpoint );
+    recv_ipaddr = src_endpoint.address().to_string();
+
+    if( recv_ipaddr != src_ip )
+    {
+        return std::make_tuple( 0, recv_ipaddr );
+    }
+    else
+    {
+        mtx_.lock();
+        recvdata_.clear();
+        std::copy( buffer.begin(), buffer.end(), recvdata_.begin() );
+        mtx_.unlock();
+    }
+
+    return std::make_tuple( sent, recv_ipaddr );
 }

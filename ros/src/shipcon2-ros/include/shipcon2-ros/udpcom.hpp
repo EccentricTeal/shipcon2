@@ -14,6 +14,7 @@
 #include <string>
 #include <memory>
 #include <mutex>
+#include <vector>
 #include <array>
 #include <tuple>
 #include <system_error.hpp>
@@ -50,16 +51,16 @@ class UdpRecvClass
     public:
     UdpRecvClass( uint16_t udp_port );
     ~UdpRecvClass();
-    int32_t recvData( std::string src_ip, std::string* buffer );
+    std::tuple<size_t, std::string> recvData( std::string src_ip );
 
     /* Class member functions */
     private:
     void init_( void );
+    std::vector<char> recvdata_;
 
     /* Class member variables */
     private:
-    std::array<char,4096> recvbuf_;
-    boost::asio::ip::udp::endpoint src_endpoint_;
+    std::mutex mtx_;
     std::unique_ptr<boost::asio::io_service> iosrv_ptr_;
     std::unique_ptr<boost::asio::ip::udp::socket> socket_ptr_;
 };
