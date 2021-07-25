@@ -6,4 +6,5 @@ After discussing and when we decide license style, we will change this license f
 
 
 Suisei WADA
-Main Developper of Shipcon & Shipcon2
+The developper of Shipcon & Shipcon2
+Osaka University
