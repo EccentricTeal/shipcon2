@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(shipdev_jg35fd)
+project(shipcon)
 
 # Default to C99
 if(NOT CMAKE_C_STANDARD)
@@ -19,6 +19,7 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(hardware_communication_lib REQUIRED)
 
 #add_executable(jg35fd_driver_node
 #  src/jg35fd_driver_node.cc
