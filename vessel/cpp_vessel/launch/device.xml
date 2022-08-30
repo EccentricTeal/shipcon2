@@ -1,0 +1,8 @@
+<launch>
+  <node namespace="cpp_vessel" name="motor" pkg="base_address_technologies_japan_drivers" exec="motor_cpp">
+    <param name="network/device_ip" value="192.168.39.11"/>
+    <param name="network/device_ip_mask" value="255.255.255.0"/>
+    <param name="network/my_port" value="50001"/>
+    <param name="network/device_port" value="50003"/>
+  </node>
+</launch>
