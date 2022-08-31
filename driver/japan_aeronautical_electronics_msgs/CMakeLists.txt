@@ -27,8 +27,7 @@ set(srv_files
   "srv/gyro/jg35fd/Jg35fdControlCalculate.srv"
   "srv/gyro/jg35fd/Jg35fdControlOutput.srv"
   "srv/gyro/jg35fd/Jg35fdResetAngle.srv"
-  "srv/gyro/jg35fd/Jg35fdSetAnalogRange.srv"
-  "srv/gyro/jg35fd/Jg35fdSetAnalogYawrateRange.srv"
+  "srv/gyro/jg35fd/Jg35fdSetAnalogMode.srv"
 )
 rosidl_generate_interfaces(${PROJECT_NAME}
   ${srv_files}

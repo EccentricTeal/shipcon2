@@ -1,6 +1,6 @@
 uint8 calculation
-uint8 CALCULATION_DISABLE = 0
-uint8 CALCULATION_ENABLE = 1
+uint8 CALCULATION_DISABLE = 0x31
+uint8 CALCULATION_ENABLE = 0x30
 ---
 int8 result
 int8 RESULT_FAIL = -1

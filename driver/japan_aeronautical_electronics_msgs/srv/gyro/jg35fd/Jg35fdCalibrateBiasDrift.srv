@@ -1,3 +1,6 @@
+uint8 request
+uint8 REQUEST_START = 0x35
+uint8 REQUEST_ABORT = 0x30
 ---
 int8 result
 int8 RESULT_FAIL = -1

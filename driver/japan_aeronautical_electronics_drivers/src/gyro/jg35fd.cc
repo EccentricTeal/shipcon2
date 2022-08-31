@@ -41,8 +41,7 @@ namespace shipcon::device::japan_aeronautical_electronics
     this->declare_parameter( "servicename/calibrate_bias_drift" );
     this->declare_parameter( "servicename/control_calculate" );
     this->declare_parameter( "servicename/reset_angle" );
-    this->declare_parameter( "servicename/set_analog_range" );
-    this->declare_parameter( "servicename/set_analog_yawrate_range" );
+    this->declare_parameter( "servicename/set_analog_mode" );
 
     try
     {
@@ -50,8 +49,7 @@ namespace shipcon::device::japan_aeronautical_electronics
       srvname_calibrate_bias_drift_ = this->get_parameter( "servicename/calibrate_bias_drift" ).as_string();
       srvname_control_calculate_ = this->get_parameter( "servicename/control_calculate" ).as_string();
       srvname_reset_angle_ = this->get_parameter( "servicename/reset_angle" ).as_string();
-      srvname_set_analog_range_ = this->get_parameter( "servicename/set_analog_range" ).as_string();
-      srvname_set_analog_yawrate_range_ = this->get_parameter( "servicename/set_analog_yawrate_range" ).as_string();
+      srvname_set_analog_mode_ = this->get_parameter( "servicename/set_analog_mode" ).as_string();
     }
     catch( rclcpp::exceptions::ParameterNotDeclaredException )
     {
@@ -107,26 +105,15 @@ namespace shipcon::device::japan_aeronautical_electronics
       )
     );
     
-    srv_set_analog_range_ = create_service<japan_aeronautical_electronics_msgs::srv::Jg35fdSetAnalogRange>(
-      srvname_set_analog_range_,
+    srv_set_analog_mode_ = create_service<japan_aeronautical_electronics_msgs::srv::Jg35fdSetAnalogMode>(
+      srvname_set_analog_mode_,
       std::bind(
-        &GyroJg35fd::callback_srv_set_analog_range,
+        &GyroJg35fd::callback_srv_set_analog_mode,
         this,
         std::placeholders::_1,
         std::placeholders::_2,
         std::placeholders::_3
       )
-    );
-
-    srv_set_analog_yawrate_range_ = create_service<japan_aeronautical_electronics_msgs::srv::Jg35fdSetAnalogYawrateRange>(
-      srvname_set_analog_yawrate_range_,
-      std::bind(
-        &GyroJg35fd::callback_srv_set_analog_yawrate_range,
-        this,
-        std::placeholders::_1,
-        std::placeholders::_2,
-        std::placeholders::_3
-      )        
     );
   }
 
@@ -430,14 +417,14 @@ namespace shipcon::device::japan_aeronautical_electronics
   }
 
 
-  void GyroJg35fd::configureOutput( TxInterval interval, OutputMode mode )
+  void GyroJg35fd::configureOutput( uint8_t interval, uint8_t mode )
   {
     uint8_t checksum = static_cast<uint8_t>( mode + interval );
 
     auto send_buffer_ = std::make_shared<std::vector<unsigned char>>();
     send_buffer_->push_back( 0x02 );
-    send_buffer_->push_back( static_cast<uint8_t>( mode ) );
-    send_buffer_->push_back( static_cast<uint8_t>( interval ) );
+    send_buffer_->push_back( mode );
+    send_buffer_->push_back( interval );
     send_buffer_->push_back( checksum );
     send_buffer_->push_back( 0x0d );
 
@@ -453,15 +440,14 @@ namespace shipcon::device::japan_aeronautical_electronics
   }
 
 
-  void GyroJg35fd::resetAngle( double new_angle )
+  void GyroJg35fd::requestConfigureBiasDrift( uint8_t request )
   {
-    /* int16_t angle = static_cast<int16_t>( new_angle * 32767.0 / 180.0 );
-    uint8_t checksum = static_cast<uint8_t>( 0x85 + interval );
+    uint8_t checksum = static_cast<uint8_t>( 0x84 + request );
 
     auto send_buffer_ = std::make_shared<std::vector<unsigned char>>();
     send_buffer_->push_back( 0x02 );
-    send_buffer_->push_back( 0x85 );
-    send_buffer_->push_back( interval );
+    send_buffer_->push_back( 0x84 );
+    send_buffer_->push_back( request );
     send_buffer_->push_back( checksum );
     send_buffer_->push_back( 0x0d );
 
@@ -473,7 +459,94 @@ namespace shipcon::device::japan_aeronautical_electronics
         std::placeholders::_1,
         std::placeholders::_2
       )
-    ); */   
+    );
+  }
+
+
+  void GyroJg35fd::configureCalculate( uint8_t request )
+  {
+    uint8_t checksum = static_cast<uint8_t>( 0x86 + request );
+
+    auto send_buffer_ = std::make_shared<std::vector<unsigned char>>();
+    send_buffer_->push_back( 0x02 );
+    send_buffer_->push_back( 0x86 );
+    send_buffer_->push_back( request );
+    send_buffer_->push_back( checksum );
+    send_buffer_->push_back( 0x0d );
+
+    serialif_->dispatchSend(
+      send_buffer_,
+      std::bind(
+        &GyroJg35fd::callback_sendSerial,
+        this,
+        std::placeholders::_1,
+        std::placeholders::_2
+      )
+    );
+  }
+
+  void GyroJg35fd::requestResetAngle( double new_angle )
+  {
+    std::stringstream ss;
+    ss <<
+    std::setw(4) <<
+    std::setfill('0') <<
+    std::hex <<
+    static_cast<int16_t>( new_angle / 180.0 * 32767.0 );
+    
+    uint8_t angle_letter[4] =
+    {
+      static_cast<uint8_t>( ss.str().c_str()[0] ),
+      static_cast<uint8_t>( ss.str().c_str()[1] ),
+      static_cast<uint8_t>( ss.str().c_str()[2] ),
+      static_cast<uint8_t>( ss.str().c_str()[3] )
+    };
+
+    uint8_t checksum = static_cast<uint8_t>( 0x85 + angle_letter[0] +angle_letter[1] + angle_letter[2] + angle_letter[3]);
+
+    auto send_buffer_ = std::make_shared<std::vector<unsigned char>>();
+    send_buffer_->push_back( 0x02 );
+    send_buffer_->push_back( 0x85 );
+    send_buffer_->push_back( angle_letter[0] );
+    send_buffer_->push_back( angle_letter[1] );
+    send_buffer_->push_back( angle_letter[2] );
+    send_buffer_->push_back( angle_letter[3] );
+    send_buffer_->push_back( checksum );
+    send_buffer_->push_back( 0x0d );
+
+    serialif_->dispatchSend(
+      send_buffer_,
+      std::bind(
+        &GyroJg35fd::callback_sendSerial,
+        this,
+        std::placeholders::_1,
+        std::placeholders::_2
+      )
+    );
+  }
+
+
+  void GyroJg35fd::configureAnalog( uint8_t mode, uint8_t range )
+  {
+    uint8_t checksum = static_cast<uint8_t>( 0xb3 + mode + range );
+
+    auto send_buffer_ = std::make_shared<std::vector<unsigned char>>();
+    send_buffer_->push_back( 0x02 );
+    send_buffer_->push_back( 0xb3 );
+    send_buffer_->push_back( mode );
+    send_buffer_->push_back( range );
+    send_buffer_->push_back( checksum );
+    send_buffer_->push_back( 0x0d );
+
+    serialif_->dispatchSend(
+      send_buffer_,
+      std::bind(
+        &GyroJg35fd::callback_sendSerial,
+        this,
+        std::placeholders::_1,
+        std::placeholders::_2
+      )
+    );
   }
 
 
@@ -483,34 +556,32 @@ namespace shipcon::device::japan_aeronautical_electronics
     const std::shared_ptr<japan_aeronautical_electronics_msgs::srv::Jg35fdControlOutput_Response> res
   )
   {
-    japan_aeronautical_electronics_msgs::srv::Jg35fdControlOutput_Response resdata;
-    TxInterval outint;
-    OutputMode outmode;
+    using namespace japan_aeronautical_electronics_msgs::srv;
 
-    switch( req -> output )
-    {
-      case japan_aeronautical_electronics_msgs::srv::Jg35fdControlOutput_Request::MODE_STOP: outint = TxInterval::stop;
-      case japan_aeronautical_electronics_msgs::srv::Jg35fdControlOutput_Request::MODE_ONE_TIME: outint = TxInterval::once;
-      case japan_aeronautical_electronics_msgs::srv::Jg35fdControlOutput_Request::MODE_CONTINUE_20MS: outint = TxInterval::_20ms;
-      case japan_aeronautical_electronics_msgs::srv::Jg35fdControlOutput_Request::MODE_CONTINUE_50MS: outint = TxInterval::_50ms;
-      case japan_aeronautical_electronics_msgs::srv::Jg35fdControlOutput_Request::MODE_CONTINUE_100MS: outint = TxInterval::_100ms;
-      case japan_aeronautical_electronics_msgs::srv::Jg35fdControlOutput_Request::MODE_CONTINUE_200MS: outint = TxInterval::_200ms;
-      case japan_aeronautical_electronics_msgs::srv::Jg35fdControlOutput_Request::MODE_CONTINUE_250MS: outint = TxInterval::_250ms;
-      case japan_aeronautical_electronics_msgs::srv::Jg35fdControlOutput_Request::MODE_CONTINUE_500MS: outint = TxInterval::_500ms;
-      case japan_aeronautical_electronics_msgs::srv::Jg35fdControlOutput_Request::MODE_CONTINUE_1000MS: outint = TxInterval::_1000ms;
-      default: outint = TxInterval::_100ms;
-    }
+    res->result = Jg35fdControlOutput_Response::RESULT_DONE;
 
-    switch( req -> mode )
-    {
-      case japan_aeronautical_electronics_msgs::srv::Jg35fdControlOutput_Request::OUTPUT_YAW: outmode = OutputMode::yaw_angle;
-      case japan_aeronautical_electronics_msgs::srv::Jg35fdControlOutput_Request::OUTPUT_YAWRATE: outmode = OutputMode::yaw_rate;
-      case japan_aeronautical_electronics_msgs::srv::Jg35fdControlOutput_Request::OUTPUT_BOTH: outmode = OutputMode::both;
-      default: outmode = OutputMode::both;
-    }
+    if(
+      req->mode != Jg35fdControlOutput_Request::MODE_STOP &&
+      req->mode != Jg35fdControlOutput_Request::MODE_ONE_TIME &&
+      req->mode != Jg35fdControlOutput_Request::MODE_CONTINUE_20MS &&
+      req->mode != Jg35fdControlOutput_Request::MODE_CONTINUE_50MS &&
+      req->mode != Jg35fdControlOutput_Request::MODE_CONTINUE_100MS &&
+      req->mode != Jg35fdControlOutput_Request::MODE_CONTINUE_200MS &&
+      req->mode != Jg35fdControlOutput_Request::MODE_CONTINUE_250MS &&
+      req->mode != Jg35fdControlOutput_Request::MODE_CONTINUE_500MS &&
+      req->mode != Jg35fdControlOutput_Request::MODE_CONTINUE_1000MS
+    )
+    { res->result = Jg35fdControlOutput_Response::RESULT_FAIL; }
 
-    configureOutput( outint , outmode );
-    resdata.result = resdata.RESULT_DONE;
+    switch(
+      req -> output != Jg35fdControlOutput_Request::OUTPUT_YAW &&
+      req -> output != Jg35fdControlOutput_Request::OUTPUT_YAWRATE &&
+      req -> output != Jg35fdControlOutput_Request::OUTPUT_BOTH
+    )
+    { res->result = Jg35fdControlOutput_Response::RESULT_FAIL; }
+
+    if( res->result == Jg35fdControlOutput_Response::RESULT_DONE )
+    { configureOutput( req->mode , req->output ); }
   }
 
 
@@ -520,7 +591,18 @@ namespace shipcon::device::japan_aeronautical_electronics
     const std::shared_ptr<japan_aeronautical_electronics_msgs::srv::Jg35fdCalibrateBiasDrift_Response> res
   )
   {
+    using namespace japan_aeronautical_electronics_msgs::srv;
 
+    res->result = Jg35fdCalibrateBiasDrift_Response::RESULT_DONE;
+
+    if(
+      req->request != Jg35fdCalibrateBiasDrift_Request::REQUEST_START &&
+      req->request != Jg35fdCalibrateBiasDrift_Request::REQUEST_ABORT
+    )
+    { res->result = Jg35fdCalibrateBiasDrift_Response::RESULT_FAIL; }
+
+    if( res->result == Jg35fdCalibrateBiasDrift_Response::RESULT_DONE )
+    { requestConfigureBiasDrift( req->request ); }
   }
 
 
@@ -530,7 +612,18 @@ namespace shipcon::device::japan_aeronautical_electronics
     const std::shared_ptr<japan_aeronautical_electronics_msgs::srv::Jg35fdControlCalculate_Response> res
   )
   {
+    using namespace japan_aeronautical_electronics_msgs::srv;
 
+    res->result = Jg35fdControlCalculate_Response::RESULT_DONE;
+
+    if(
+      req->calculation != Jg35fdControlCalculate_Request::CALCULATION_DISABLE &&
+      req->calculation != Jg35fdControlCalculate_Request::CALCULATION_ENABLE
+    )
+    { res->result = Jg35fdControlCalculate_Response::RESULT_FAIL; }
+
+    if( res->result == Jg35fdControlCalculate_Response::RESULT_DONE )
+    { configureCalculate( req->calculation ); }
   }
 
 
@@ -540,27 +633,62 @@ namespace shipcon::device::japan_aeronautical_electronics
     const std::shared_ptr<japan_aeronautical_electronics_msgs::srv::Jg35fdResetAngle_Response> res
   )
   {
+    using namespace japan_aeronautical_electronics_msgs::srv;
 
+    res->result = Jg35fdResetAngle_Response::RESULT_DONE;
+
+    if(
+      req->yaw_angle_rad > 180.0 ||
+      req->yaw_angle_rad < -180.0
+    )
+    { res->result = Jg35fdResetAngle_Response::RESULT_FAIL; }
+
+    if( res->result == Jg35fdResetAngle_Response::RESULT_DONE )
+    { requestResetAngle( req->yaw_angle_rad ); }
   }
 
 
-  void GyroJg35fd::callback_srv_set_analog_range(
+  void GyroJg35fd::callback_srv_set_analog_mode(
     const std::shared_ptr<rmw_request_id_t> req_header,
-    const std::shared_ptr<japan_aeronautical_electronics_msgs::srv::Jg35fdSetAnalogRange_Request> req,
-    const std::shared_ptr<japan_aeronautical_electronics_msgs::srv::Jg35fdSetAnalogRange_Response> res
+    const std::shared_ptr<japan_aeronautical_electronics_msgs::srv::Jg35fdSetAnalogMode_Request> req,
+    const std::shared_ptr<japan_aeronautical_electronics_msgs::srv::Jg35fdSetAnalogMode_Response> res
   )
   {
-    
-  }
+    using namespace japan_aeronautical_electronics_msgs::srv;
 
+    res->result = Jg35fdSetAnalogMode_Response::RESULT_DONE;
 
-  void GyroJg35fd::callback_srv_set_analog_yawrate_range(
-    const std::shared_ptr<rmw_request_id_t> req_header,
-    const std::shared_ptr<japan_aeronautical_electronics_msgs::srv::Jg35fdSetAnalogYawrateRange_Request> req,
-    const std::shared_ptr<japan_aeronautical_electronics_msgs::srv::Jg35fdSetAnalogYawrateRange_Response> res
-  )
-  {
-    
+    if( req->analog_mode == Jg35fdSetAnalogMode_Request::ANALOG_MODE_YAW )
+    {
+      if(
+        req->yaw_range != Jg35fdSetAnalogMode_Request::YAW_RANGE_10DEG &&
+        req->yaw_range != Jg35fdSetAnalogMode_Request::YAW_RANGE_20DEG &&
+        req->yaw_range != Jg35fdSetAnalogMode_Request::YAW_RANGE_45DEG &&
+        req->yaw_range != Jg35fdSetAnalogMode_Request::YAW_RANGE_90DEG &&
+        req->yaw_range != Jg35fdSetAnalogMode_Request::YAW_RANGE_180DEG
+      )
+      { res->result = Jg35fdSetAnalogMode_Response::RESULT_FAIL; }
+
+      if( res->result == Jg35fdControlCalculate_Response::RESULT_DONE )
+      { configureAnalog( req->analog_mode, req->yaw_range ); }
+    }
+    else if( req->analog_mode == Jg35fdSetAnalogMode_Request::ANALOG_MODE_YAWRATE )
+    {
+      if(
+        req->yawrate_range != Jg35fdSetAnalogMode_Request::YAWRATE_RANGE_10DEG &&
+        req->yawrate_range != Jg35fdSetAnalogMode_Request::YAWRATE_RANGE_20DEG &&
+        req->yawrate_range != Jg35fdSetAnalogMode_Request::YAWRATE_RANGE_50DEG &&
+        req->yawrate_range != Jg35fdSetAnalogMode_Request::YAWRATE_RANGE_100DEG &&
+        req->yawrate_range != Jg35fdSetAnalogMode_Request::YAWRATE_RANGE_200DEG
+      )
+      { res->result = Jg35fdSetAnalogMode_Response::RESULT_FAIL; }
+
+      if( res->result == Jg35fdControlCalculate_Response::RESULT_DONE )
+      { configureAnalog( req->analog_mode, req->yawrate_range ); }
+    }
+    else
+    { res->result = Jg35fdSetAnalogMode_Response::RESULT_FAIL; }
+
   }
 
 
