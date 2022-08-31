@@ -6,11 +6,12 @@
 #include "hardware_communication_lib/serialcom.hh"
 
 //ROS Service
-#include "shipcondev_gyro_jg35fd/srv/control_output.hpp"
-#include "shipcondev_gyro_jg35fd/srv/calibrate_bias_drift.hpp"
-#include "shipcondev_gyro_jg35fd/srv/control_calculate.hpp"
-#include "shipcondev_gyro_jg35fd/srv/reset_angle.hpp"
-#include "shipcondev_gyro_jg35fd/srv/set_analog_range.hpp"
+#include "japan_aeronautical_electronics_msgs/srv/jg35fd_control_output.hpp"
+// #include "shipcondev_gyro_jg35fd/srv/control_output.hpp"
+// #include "shipcondev_gyro_jg35fd/srv/calibrate_bias_drift.hpp"
+// #include "shipcondev_gyro_jg35fd/srv/control_calculate.hpp"
+// #include "shipcondev_gyro_jg35fd/srv/reset_angle.hpp"
+// #include "shipcondev_gyro_jg35fd/srv/set_analog_range.hpp"
 
 //STL
 #include <memory>
