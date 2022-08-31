@@ -1,36 +1,14 @@
-#include "shipcondev_gyro_jg35fd/driver.hh"
+#include "japan_aeronautical_electronics_drivers/gyro.hh"
 
-namespace shipcon::device
+
+namespace shipcon::device::japan_aeronautical_electronics
 {
-  GyroJaeJG35FD::GyroJaeJG35FD( std::string node_name, std::string name_space ):
+  GyroJg35fd::GyroJg35fd( std::string node_name, std::string name_space ):
   rclcpp::Node( node_name, name_space )
   {
     //init ROS Service
-    srvname_control_output_ = declare_parameter( "servicename/control_output", "control_output" );
-    srv_control_output_ = create_service<shipcondev_gyro_jg35fd::srv::ControlOutput>(
-      srvname_control_output_,
-      &GyroJaeJG35FD::callback_srv_control_output
-    );
-    srvname_calibrate_bias_drift_ = declare_parameter( "servicename/calibrate_bias_drift", "calibrate_bias_drift" );
-    srv_calibrate_bias_drift_ = create_service<shipcondev_gyro_jg35fd::srv::CalibrateBiasDrift>(
-      srvname_calibrate_bias_drift_,
-      &GyroJaeJG35FD::callback_srv_calibrate_bias_drift
-    );
-    srvname_control_calculate_ = declare_parameter( "servicename/control_calculate", "control_calculate" );
-    srv_control_calculate_ = create_service<shipcondev_gyro_jg35fd::srv::ControlCalculate>(
-      srvname_control_calculate_,
-      &GyroJaeJG35FD::callback_srv_control_calculate
-    );
-    srvname_reset_angle_ = declare_parameter( "servicename/reset_angle", "reset_angle" );
-    srv_reset_angle_ = create_service<shipcondev_gyro_jg35fd::srv::ResetAngle>(
-      srvname_reset_angle_,
-      &GyroJaeJG35FD::callback_srv_reset_angle
-    );
-    srvname_set_analog_range_ = declare_parameter( "servicename/set_analog_range", "set_analog_rage" );
-    srv_set_analog_range_ = create_service<shipcondev_gyro_jg35fd::srv::SetAnalogRange>(
-      srvname_set_analog_range_,
-      &GyroJaeJG35FD::callback_srv_set_analog_range
-    );
+    initServiceParameter();
+    initService();
 
     //init serial device
     if ( initSerial() ){ serialif_->run(); }
@@ -43,7 +21,7 @@ namespace shipcon::device
       recv_buffer_,
       REGEX_CONDITION_HEADER,
       std::bind(
-        &GyroJaeJG35FD::callback_receive_header,
+        &GyroJg35fd::callback_receive_header,
         this,
         std::placeholders::_1,
         std::placeholders::_2
@@ -51,16 +29,127 @@ namespace shipcon::device
     );
   }
 
-  GyroJaeJG35FD::~GyroJaeJG35FD()
+  GyroJg35fd::~GyroJg35fd()
   {
     ;
   }
 
 
-  bool GyroJaeJG35FD::initSerial( void )
+  void GyroJg35fd::initServiceParameter( void )
   {
+    this->declare_parameter( "servicename/control_output" );
+    this->declare_parameter( "servicename/calibrate_bias_drift" );
+    this->declare_parameter( "servicename/control_calculate" );
+    this->declare_parameter( "servicename/reset_angle" );
+    this->declare_parameter( "servicename/set_analog_range" );
+    this->declare_parameter( "servicename/set_analog_yawrate_range" );
+
+    try
+    {
+      srvname_control_output_ = this->get_parameter( "servicename/control_output" ).as_string();
+      srvname_calibrate_bias_drift_ = this->get_parameter( "servicename/calibrate_bias_drift" ).as_string();
+      srvname_control_calculate_ = this->get_parameter( "servicename/control_calculate" ).as_string();
+      srvname_reset_angle_ = this->get_parameter( "servicename/reset_angle" ).as_string();
+      srvname_set_analog_range_ = this->get_parameter( "servicename/set_analog_range" ).as_string();
+      srvname_set_analog_yawrate_range_ = this->get_parameter( "servicename/set_analog_yawrate_range" ).as_string();
+    }
+    catch( rclcpp::exceptions::ParameterNotDeclaredException )
+    {
+      RCLCPP_ERROR_STREAM( this->get_logger(), "Not set Service name in parameter!" );
+      rclcpp::shutdown();
+    }
+  }
+
+
+  void GyroJg35fd::initService( void )
+  {
+    srv_control_output_ = create_service<japan_aeronautical_electronics_msgs::srv::Jg35fdControlOutput>(
+      srvname_control_output_,
+      std::bind(
+        &GyroJg35fd::callback_srv_control_output,
+        this,
+        std::placeholders::_1,
+        std::placeholders::_2,
+        std::placeholders::_3
+      )
+    );
     
-    serialif_ = std::make_unique<hwcomlib::SerialCom>( "/dev/ttyUSB0", BAUDRATE );
+    srv_calibrate_bias_drift_ = create_service<japan_aeronautical_electronics_msgs::srv::Jg35fdCalibrateBiasDrift>(
+      srvname_calibrate_bias_drift_,
+      std::bind(
+        &GyroJg35fd::callback_srv_calibrate_bias_drift,
+        this,
+        std::placeholders::_1,
+        std::placeholders::_2,
+        std::placeholders::_3
+      )
+    );
+  
+    srv_control_calculate_ = create_service<japan_aeronautical_electronics_msgs::srv::Jg35fdControlCalculate>(
+      srvname_control_calculate_,
+      std::bind(
+        &GyroJg35fd::callback_srv_control_calculate,
+        this,
+        std::placeholders::_1,
+        std::placeholders::_2,
+        std::placeholders::_3
+      )
+    );
+    
+    srv_reset_angle_ = create_service<japan_aeronautical_electronics_msgs::srv::Jg35fdResetAngle>(
+      srvname_reset_angle_,
+      std::bind(
+        &GyroJg35fd::callback_srv_reset_angle,
+        this,
+        std::placeholders::_1,
+        std::placeholders::_2,
+        std::placeholders::_3
+      )
+    );
+    
+    srv_set_analog_range_ = create_service<japan_aeronautical_electronics_msgs::srv::Jg35fdSetAnalogRange>(
+      srvname_set_analog_range_,
+      std::bind(
+        &GyroJg35fd::callback_srv_set_analog_range,
+        this,
+        std::placeholders::_1,
+        std::placeholders::_2,
+        std::placeholders::_3
+      )
+    );
+
+    srv_set_analog_yawrate_range_ = create_service<japan_aeronautical_electronics_msgs::srv::Jg35fdSetAnalogYawrateRange>(
+      srvname_set_analog_yawrate_range_,
+      std::bind(
+        &GyroJg35fd::callback_srv_set_analog_yawrate_range,
+        this,
+        std::placeholders::_1,
+        std::placeholders::_2,
+        std::placeholders::_3
+      )        
+    );
+  }
+
+
+  void GyroJg35fd::initSerialParameter( void )
+  {
+    this->declare_parameter( "serial/port_name" );
+
+    try
+    {
+      serial_port_name_ = this->get_parameter( "serial/port_name" ).as_string();
+    }
+    catch( rclcpp::exceptions::ParameterNotDeclaredException )
+    {
+      RCLCPP_ERROR_STREAM( this->get_logger(), "Not set Serial Port as parameter!" );
+      rclcpp::shutdown();
+    }
+  }
+
+
+  bool GyroJg35fd::initSerial( void )
+  {  
+    serialif_ = std::make_unique<hwcomlib::SerialCom>( serial_port_name_, BAUDRATE );
 
     if( serialif_ )
     {
@@ -68,21 +157,19 @@ namespace shipcon::device
       serialif_->setFlowControl( boost::asio::serial_port_base::flow_control::none );
       serialif_->setParity( boost::asio::serial_port_base::parity::odd );
       serialif_->setStopBits( boost::asio::serial_port_base::stop_bits::one );
-
       return true;
     }
-
     return false;
   }
 
 
-  void GyroJaeJG35FD::callback_sendSerial( const boost::system::error_code& ec, std::size_t sendsize )
+  void GyroJg35fd::callback_sendSerial( const boost::system::error_code& ec, std::size_t sendsize )
   {
     //std::cout << std::dec << sendsize << std::endl;
   }
 
 
-  void GyroJaeJG35FD::callback_receive_header( const boost::system::error_code& ec, std::size_t recvsize )
+  void GyroJg35fd::callback_receive_header( const boost::system::error_code& ec, std::size_t recvsize )
   {
     std::istream istr( &recv_buffer_ );
 
@@ -111,7 +198,7 @@ namespace shipcon::device
         recv_buffer_,
         5,
         std::bind(
-          &GyroJaeJG35FD::callback_receive_data,
+          &GyroJg35fd::callback_receive_data,
           this,
           std::placeholders::_1,
           std::placeholders::_2,
@@ -126,7 +213,7 @@ namespace shipcon::device
         recv_buffer_,
         7,
         std::bind(
-          &GyroJaeJG35FD::callback_receive_data,
+          &GyroJg35fd::callback_receive_data,
           this,
           std::placeholders::_1,
           std::placeholders::_2,
@@ -142,7 +229,7 @@ namespace shipcon::device
       recv_buffer_,
       REGEX_CONDITION_HEADER,
       std::bind(
-        &GyroJaeJG35FD::callback_receive_header,
+        &GyroJg35fd::callback_receive_header,
         this,
         std::placeholders::_1,
         std::placeholders::_2
@@ -152,7 +239,7 @@ namespace shipcon::device
   }
 
 
-  void GyroJaeJG35FD::callback_receive_data( const boost::system::error_code& ec, std::size_t recvsize, unsigned int datasize )
+  void GyroJg35fd::callback_receive_data( const boost::system::error_code& ec, std::size_t recvsize, unsigned int datasize )
   {
     std::istream istr( &recv_buffer_ );
         
@@ -164,7 +251,7 @@ namespace shipcon::device
         recv_buffer_,
         REGEX_CONDITION_HEADER,
         std::bind(
-          &GyroJaeJG35FD::callback_receive_header,
+          &GyroJg35fd::callback_receive_header,
           this,
           std::placeholders::_1,
           std::placeholders::_2
@@ -180,8 +267,7 @@ namespace shipcon::device
     //Evaluate final byte whether 0x0d or not
     //In case the header got previous process is true header, update data variable.
     if( *( std::prev( data_buffer_.end() ) ) == 0x0d )//in case received header is true header
-    {
-      
+    {  
       updateData();
     }
     //In case received header is just a part of data
@@ -200,7 +286,7 @@ namespace shipcon::device
             recv_buffer_,
             REGEX_CONDITION_HEADER,
             std::bind(
-              &GyroJaeJG35FD::callback_receive_header,
+              &GyroJg35fd::callback_receive_header,
               this,
               std::placeholders::_1,
               std::placeholders::_2
@@ -217,7 +303,7 @@ namespace shipcon::device
             recv_buffer_,
             1,
             std::bind(
-              &GyroJaeJG35FD::callback_receive_header,
+              &GyroJg35fd::callback_receive_header,
               this,
               std::placeholders::_1,
               std::placeholders::_2
@@ -243,7 +329,7 @@ namespace shipcon::device
               recv_buffer_,
               ( 7 - data_buffer_.size() ),
               std::bind(
-                &GyroJaeJG35FD::callback_receive_data,
+                &GyroJg35fd::callback_receive_data,
                 this,
                 std::placeholders::_1,
                 std::placeholders::_2,
@@ -266,7 +352,7 @@ namespace shipcon::device
               recv_buffer_,
               ( 9 - data_buffer_.size() ),
               std::bind(
-                &GyroJaeJG35FD::callback_receive_data,
+                &GyroJg35fd::callback_receive_data,
                 this,
                 std::placeholders::_1,
                 std::placeholders::_2,
@@ -285,7 +371,7 @@ namespace shipcon::device
   }
 
 
-  void GyroJaeJG35FD::updateData( void )
+  void GyroJg35fd::updateData( void )
   {
     uint16_t angle = 0;
     int16_t rate = 0;
@@ -309,7 +395,7 @@ namespace shipcon::device
         rate = static_cast<int16_t>( data_buffer_[3] << 8 ) + data_buffer_[4];
 
         std::lock_guard<std::mutex> lock(mtx_);
-        yaw_rate_ = static_cast<double>( rate ) / static_cast<double>( 0x7fff ) * deg2rad( 200.0 );
+        yaw_rate_ = static_cast<double>( rate ) / static_cast<double>( 0x7fff ) * unitcon::angle::deg2rad( 200.0 );
       }
     }
     else if( data_buffer_[1] == 0x83)
@@ -322,7 +408,7 @@ namespace shipcon::device
 
         std::lock_guard<std::mutex> lock(mtx_);
         yaw_angle_ = static_cast<double>( angle ) / static_cast<double>( 0xffff ) * M_PI * 2.0 ;
-        yaw_rate_ = static_cast<double>( rate ) / static_cast<double>( 0x7fff ) * deg2rad( 200.0 );
+        yaw_rate_ = static_cast<double>( rate ) / static_cast<double>( 0x7fff ) * unitcon::angle::deg2rad( 200.0 );
       }
     }
   
@@ -335,7 +421,7 @@ namespace shipcon::device
       recv_buffer_,
       REGEX_CONDITION_HEADER,
       std::bind(
-        &GyroJaeJG35FD::callback_receive_header,
+        &GyroJg35fd::callback_receive_header,
         this,
         std::placeholders::_1,
         std::placeholders::_2
@@ -344,7 +430,7 @@ namespace shipcon::device
   }
 
 
-  void GyroJaeJG35FD::configureOutput( TxInterval interval, OutputMode mode )
+  void GyroJg35fd::configureOutput( TxInterval interval, OutputMode mode )
   {
     uint8_t checksum = static_cast<uint8_t>( mode + interval );
 
@@ -358,7 +444,7 @@ namespace shipcon::device
     serialif_->dispatchSend(
       send_buffer_,
       std::bind(
-        &GyroJaeJG35FD::callback_sendSerial,
+        &GyroJg35fd::callback_sendSerial,
         this,
         std::placeholders::_1,
         std::placeholders::_2
@@ -367,7 +453,7 @@ namespace shipcon::device
   }
 
 
-  void GyroJaeJG35FD::resetAngle( double new_angle )
+  void GyroJg35fd::resetAngle( double new_angle )
   {
     /* int16_t angle = static_cast<int16_t>( new_angle * 32767.0 / 180.0 );
     uint8_t checksum = static_cast<uint8_t>( 0x85 + interval );
@@ -382,7 +468,7 @@ namespace shipcon::device
     serialif_->dispatchSend(
       send_buffer_,
       std::bind(
-        &GyroJaeJG35FD::callback_sendSerial,
+        &GyroJg35fd::callback_sendSerial,
         this,
         std::placeholders::_1,
         std::placeholders::_2
@@ -391,77 +477,87 @@ namespace shipcon::device
   }
 
 
-  void GyroJaeJG35FD::callback_srv_control_output(
+  void GyroJg35fd::callback_srv_control_output(
     const std::shared_ptr<rmw_request_id_t> req_header,
-    const std::shared_ptr<shipcondev_gyro_jg35fd::srv::ControlOutput_Request> req,
-    const std::shared_ptr<shipcondev_gyro_jg35fd::srv::ControlOutput_Response> res
+    const std::shared_ptr<japan_aeronautical_electronics_msgs::srv::Jg35fdControlOutput_Request> req,
+    const std::shared_ptr<japan_aeronautical_electronics_msgs::srv::Jg35fdControlOutput_Response> res
   )
   {
-    shipcondev_gyro_jg35fd::srv::ControlCalculate_Response resdata;
+    japan_aeronautical_electronics_msgs::srv::Jg35fdControlOutput_Response resdata;
     TxInterval outint;
     OutputMode outmode;
 
     switch( req -> output )
     {
-      case shipcondev_gyro_jg35fd::srv::ControlOutput_Request::MODE_STOP: outint = TxInterval::stop;
-      case shipcondev_gyro_jg35fd::srv::ControlOutput_Request::MODE_ONE_TIME: outint = TxInterval::once;
-      case shipcondev_gyro_jg35fd::srv::ControlOutput_Request::MODE_CONTINUE_20MS: outint = TxInterval::_20ms;
-      case shipcondev_gyro_jg35fd::srv::ControlOutput_Request::MODE_CONTINUE_50MS: outint = TxInterval::_50ms;
-      case shipcondev_gyro_jg35fd::srv::ControlOutput_Request::MODE_CONTINUE_100MS: outint = TxInterval::_100ms;
-      case shipcondev_gyro_jg35fd::srv::ControlOutput_Request::MODE_CONTINUE_200MS: outint = TxInterval::_200ms;
-      case shipcondev_gyro_jg35fd::srv::ControlOutput_Request::MODE_CONTINUE_250MS: outint = TxInterval::_250ms;
-      case shipcondev_gyro_jg35fd::srv::ControlOutput_Request::MODE_CONTINUE_500MS: outint = TxInterval::_500ms;
-      case shipcondev_gyro_jg35fd::srv::ControlOutput_Request::MODE_CONTINUE_1000MS: outint = TxInterval::_1000ms;
+      case japan_aeronautical_electronics_msgs::srv::Jg35fdControlOutput_Request::MODE_STOP: outint = TxInterval::stop;
+      case japan_aeronautical_electronics_msgs::srv::Jg35fdControlOutput_Request::MODE_ONE_TIME: outint = TxInterval::once;
+      case japan_aeronautical_electronics_msgs::srv::Jg35fdControlOutput_Request::MODE_CONTINUE_20MS: outint = TxInterval::_20ms;
+      case japan_aeronautical_electronics_msgs::srv::Jg35fdControlOutput_Request::MODE_CONTINUE_50MS: outint = TxInterval::_50ms;
+      case japan_aeronautical_electronics_msgs::srv::Jg35fdControlOutput_Request::MODE_CONTINUE_100MS: outint = TxInterval::_100ms;
+      case japan_aeronautical_electronics_msgs::srv::Jg35fdControlOutput_Request::MODE_CONTINUE_200MS: outint = TxInterval::_200ms;
+      case japan_aeronautical_electronics_msgs::srv::Jg35fdControlOutput_Request::MODE_CONTINUE_250MS: outint = TxInterval::_250ms;
+      case japan_aeronautical_electronics_msgs::srv::Jg35fdControlOutput_Request::MODE_CONTINUE_500MS: outint = TxInterval::_500ms;
+      case japan_aeronautical_electronics_msgs::srv::Jg35fdControlOutput_Request::MODE_CONTINUE_1000MS: outint = TxInterval::_1000ms;
       default: outint = TxInterval::_100ms;
     }
 
     switch( req -> mode )
     {
-      case shipcondev_gyro_jg35fd::srv::ControlOutput_Request::OUTPUT_YAW: outmode = OutputMode::yaw_angle;
-      case shipcondev_gyro_jg35fd::srv::ControlOutput_Request::OUTPUT_YAWRATE: outmode = OutputMode::yaw_rate;
-      case shipcondev_gyro_jg35fd::srv::ControlOutput_Request::OUTPUT_BOTH: outmode = OutputMode::both;
+      case japan_aeronautical_electronics_msgs::srv::Jg35fdControlOutput_Request::OUTPUT_YAW: outmode = OutputMode::yaw_angle;
+      case japan_aeronautical_electronics_msgs::srv::Jg35fdControlOutput_Request::OUTPUT_YAWRATE: outmode = OutputMode::yaw_rate;
+      case japan_aeronautical_electronics_msgs::srv::Jg35fdControlOutput_Request::OUTPUT_BOTH: outmode = OutputMode::both;
       default: outmode = OutputMode::both;
     }
 
     configureOutput( outint , outmode );
-
+    resdata.result = resdata.RESULT_DONE;
   }
 
 
-  void GyroJaeJG35FD::callback_srv_calibrate_bias_drift(
+  void GyroJg35fd::callback_srv_calibrate_bias_drift(
     const std::shared_ptr<rmw_request_id_t> req_header,
-    const std::shared_ptr<shipcondev_gyro_jg35fd::srv::CalibrateBiasDrift_Request> req,
-    const std::shared_ptr<shipcondev_gyro_jg35fd::srv::CalibrateBiasDrift_Response> res
+    const std::shared_ptr<japan_aeronautical_electronics_msgs::srv::Jg35fdCalibrateBiasDrift_Request> req,
+    const std::shared_ptr<japan_aeronautical_electronics_msgs::srv::Jg35fdCalibrateBiasDrift_Response> res
   )
   {
 
   }
 
 
-  void GyroJaeJG35FD::callback_srv_control_calculate(
+  void GyroJg35fd::callback_srv_control_calculate(
     const std::shared_ptr<rmw_request_id_t> req_header,
-    const std::shared_ptr<shipcondev_gyro_jg35fd::srv::ControlCalculate_Request> req,
-    const std::shared_ptr<shipcondev_gyro_jg35fd::srv::ControlCalculate_Response> res
+    const std::shared_ptr<japan_aeronautical_electronics_msgs::srv::Jg35fdControlCalculate_Request> req,
+    const std::shared_ptr<japan_aeronautical_electronics_msgs::srv::Jg35fdControlCalculate_Response> res
   )
   {
 
   }
 
 
-  void GyroJaeJG35FD::callback_srv_reset_angle(
+  void GyroJg35fd::callback_srv_reset_angle(
     const std::shared_ptr<rmw_request_id_t> req_header,
-    const std::shared_ptr<shipcondev_gyro_jg35fd::srv::ResetAngle_Request> req,
-    const std::shared_ptr<shipcondev_gyro_jg35fd::srv::ResetAngle_Response> res
+    const std::shared_ptr<japan_aeronautical_electronics_msgs::srv::Jg35fdResetAngle_Request> req,
+    const std::shared_ptr<japan_aeronautical_electronics_msgs::srv::Jg35fdResetAngle_Response> res
   )
   {
 
   }
 
 
-  void GyroJaeJG35FD::callback_srv_set_analog_range(
+  void GyroJg35fd::callback_srv_set_analog_range(
     const std::shared_ptr<rmw_request_id_t> req_header,
-    const std::shared_ptr<shipcondev_gyro_jg35fd::srv::SetAnalogRange_Request> req,
-    const std::shared_ptr<shipcondev_gyro_jg35fd::srv::SetAnalogRange_Response> res
+    const std::shared_ptr<japan_aeronautical_electronics_msgs::srv::Jg35fdSetAnalogRange_Request> req,
+    const std::shared_ptr<japan_aeronautical_electronics_msgs::srv::Jg35fdSetAnalogRange_Response> res
+  )
+  {
+    
+  }
+
+
+  void GyroJg35fd::callback_srv_set_analog_yawrate_range(
+    const std::shared_ptr<rmw_request_id_t> req_header,
+    const std::shared_ptr<japan_aeronautical_electronics_msgs::srv::Jg35fdSetAnalogYawrateRange_Request> req,
+    const std::shared_ptr<japan_aeronautical_electronics_msgs::srv::Jg35fdSetAnalogYawrateRange_Response> res
   )
   {
     

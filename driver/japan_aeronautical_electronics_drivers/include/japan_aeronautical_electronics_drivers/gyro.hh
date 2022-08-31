@@ -1,17 +1,18 @@
-#ifndef SHIPCONDEV_GYRO_JG35FD__DRIVER__HH
-#define SHIPCONDEV_GYRO_JG35FD__DRIVER__HH
+#ifndef SHIPCON2DRIVER__JAPAN_AERONAUTICAL_ELECTRONICS__GYRO__HH
+#define SHIPCON2DRIVER__JAPAN_AERONAUTICAL_ELECTRONICS__GYRO__HH
 
 //ROS Packages
 #include <rclcpp/rclcpp.hpp>
 #include "hardware_communication_lib/serialcom.hh"
+#include "unit_convert_lib/angle.hh"
 
 //ROS Service
 #include "japan_aeronautical_electronics_msgs/srv/jg35fd_control_output.hpp"
-// #include "shipcondev_gyro_jg35fd/srv/control_output.hpp"
-// #include "shipcondev_gyro_jg35fd/srv/calibrate_bias_drift.hpp"
-// #include "shipcondev_gyro_jg35fd/srv/control_calculate.hpp"
-// #include "shipcondev_gyro_jg35fd/srv/reset_angle.hpp"
-// #include "shipcondev_gyro_jg35fd/srv/set_analog_range.hpp"
+#include "japan_aeronautical_electronics_msgs/srv/jg35fd_calibrate_bias_drift.hpp"
+#include "japan_aeronautical_electronics_msgs/srv/jg35fd_control_calculate.hpp"
+#include "japan_aeronautical_electronics_msgs/srv/jg35fd_reset_angle.hpp"
+#include "japan_aeronautical_electronics_msgs/srv/jg35fd_set_analog_range.hpp"
+#include "japan_aeronautical_electronics_msgs/srv/jg35fd_set_analog_yawrate_range.hpp"
 
 //STL
 #include <memory>
@@ -25,9 +26,9 @@
 #include <boost/asio.hpp>
 #include <boost/regex.hpp>
 
-namespace shipcon::device
+namespace shipcon::device::japan_aeronautical_electronics
 {
-  class GyroJaeJG35FD : public rclcpp::Node
+  class GyroJg35fd : public rclcpp::Node
   {
     /* Constants */
     private:
@@ -48,7 +49,7 @@ namespace shipcon::device
         yaw_rate = 0x82,
         both = 0x83
       };
-      enum AnalogAngleRange{
+      enum class AnalogAngleRange{
         current = 0x30,
         _10deg = 0x31,
         _20deg = 0x32,
@@ -56,7 +57,7 @@ namespace shipcon::device
         _90deg = 0x34,
         _180deg = 0x35
       };
-      enum AnalogYawrateRange{
+      enum class AnalogYawrateRange{
         current = 0x30,
         _10deg = 0x31,
         _20deg = 0x32,
@@ -65,73 +66,28 @@ namespace shipcon::device
         _200deg = 0x35
       };
       boost::regex REGEX_CONDITION_HEADER = boost::regex("\x02[\x81-\x84]");
-
-    /* Constructor, Destructor */
-    public:
-      GyroJaeJG35FD( std::string node_name, std::string name_space );
-      ~GyroJaeJG35FD();
-
-    /* Private Methods */
-    private:
-      //Serial Communication
-      bool initSerial( void );
-      bool startSerial( void );
-      void callback_sendSerial( const boost::system::error_code& ec, std::size_t sendsize );
-      void callback_receive_header( const boost::system::error_code& ec, std::size_t recvsize );
-      void callback_receive_data( const boost::system::error_code& ec, std::size_t recvsize, unsigned int datasize );
-      void updateData( void );
-      double deg2rad( double deg ){ return deg / 360.0 * M_PI * 2.0; };
-
-      //Gyro Applications
-      void configureOutput( TxInterval interval, OutputMode mode );
-      void resetAngle( double new_angle );
-      bool configureInternalCalculator( bool isEnable );
-      AnalogAngleRange setAnalogAngleRange( AnalogAngleRange target );
-      AnalogYawrateRange setAnalogYawrateRange( AnalogYawrateRange target );
-
-      //ROS Service
-      void callback_srv_control_output(
-        const std::shared_ptr<rmw_request_id_t> req_header,
-        const std::shared_ptr<shipcondev_gyro_jg35fd::srv::ControlOutput_Request> req,
-        const std::shared_ptr<shipcondev_gyro_jg35fd::srv::ControlOutput_Response> res
-      );
-      void callback_srv_calibrate_bias_drift(
-        const std::shared_ptr<rmw_request_id_t> req_header,
-        const std::shared_ptr<shipcondev_gyro_jg35fd::srv::CalibrateBiasDrift_Request> req,
-        const std::shared_ptr<shipcondev_gyro_jg35fd::srv::CalibrateBiasDrift_Response> res
-      );
-      void callback_srv_control_calculate(
-        const std::shared_ptr<rmw_request_id_t> req_header,
-        const std::shared_ptr<shipcondev_gyro_jg35fd::srv::ControlCalculate_Request> req,
-        const std::shared_ptr<shipcondev_gyro_jg35fd::srv::ControlCalculate_Response> res
-      );
-      void callback_srv_reset_angle(
-        const std::shared_ptr<rmw_request_id_t> req_header,
-        const std::shared_ptr<shipcondev_gyro_jg35fd::srv::ResetAngle_Request> req,
-        const std::shared_ptr<shipcondev_gyro_jg35fd::srv::ResetAngle_Response> res
-      );
-      void callback_srv_set_analog_range(
-        const std::shared_ptr<rmw_request_id_t> req_header,
-        const std::shared_ptr<shipcondev_gyro_jg35fd::srv::SetAnalogRange_Request> req,
-        const std::shared_ptr<shipcondev_gyro_jg35fd::srv::SetAnalogRange_Response> res
-      );
+      const std::string DEVELOPPER_NAME = "JAPAN AERONAUTICAL ELECTRONICS CO., LTD.";
+      const std::string DEVICE_TYPE = "YAW GYRO JG35FD";
 
     /* Private Member Objects*/
     private:
       //Serial Communication
       std::unique_ptr<hwcomlib::SerialCom> serialif_;
+      std::string serial_port_name_;
       
       //ROS Service
-      rclcpp::Service<shipcondev_gyro_jg35fd::srv::ControlOutput>::SharedPtr srv_control_output_;
-      rclcpp::Service<shipcondev_gyro_jg35fd::srv::CalibrateBiasDrift>::SharedPtr srv_calibrate_bias_drift_;
-      rclcpp::Service<shipcondev_gyro_jg35fd::srv::ControlCalculate>::SharedPtr srv_control_calculate_;
-      rclcpp::Service<shipcondev_gyro_jg35fd::srv::ResetAngle>::SharedPtr srv_reset_angle_;
-      rclcpp::Service<shipcondev_gyro_jg35fd::srv::SetAnalogRange>::SharedPtr srv_set_analog_range_;
+      rclcpp::Service<japan_aeronautical_electronics_msgs::srv::Jg35fdControlOutput>::SharedPtr srv_control_output_;
+      rclcpp::Service<japan_aeronautical_electronics_msgs::srv::Jg35fdCalibrateBiasDrift>::SharedPtr srv_calibrate_bias_drift_;
+      rclcpp::Service<japan_aeronautical_electronics_msgs::srv::Jg35fdControlCalculate>::SharedPtr srv_control_calculate_;
+      rclcpp::Service<japan_aeronautical_electronics_msgs::srv::Jg35fdResetAngle>::SharedPtr srv_reset_angle_;
+      rclcpp::Service<japan_aeronautical_electronics_msgs::srv::Jg35fdSetAnalogRange>::SharedPtr srv_set_analog_range_;
+      rclcpp::Service<japan_aeronautical_electronics_msgs::srv::Jg35fdSetAnalogYawrateRange>::SharedPtr srv_set_analog_yawrate_range_;
       std::string srvname_control_output_;
       std::string srvname_calibrate_bias_drift_;
       std::string srvname_control_calculate_;
       std::string srvname_reset_angle_;
       std::string srvname_set_analog_range_;
+      std::string srvname_set_analog_yawrate_range_;
       
       //Buffers
       boost::asio::streambuf recv_buffer_;
@@ -141,6 +97,69 @@ namespace shipcon::device
       double yaw_rate_;
       //Utility
       std::mutex mtx_;
+
+    /* Constructor, Destructor */
+    public:
+      GyroJg35fd( std::string node_name, std::string name_space );
+      ~GyroJg35fd();
+
+    /* Public Methods */
+    public:
+      void run( void );
+
+    /* Private Methods */
+    private:
+      //ROS Service
+      void initServiceParameter( void );
+      void initService( void );
+
+      //Serial Communication
+      void initSerialParameter( void );
+      bool initSerial( void );
+      bool startSerial( void );
+      void callback_sendSerial( const boost::system::error_code& ec, std::size_t sendsize );
+      void callback_receive_header( const boost::system::error_code& ec, std::size_t recvsize );
+      void callback_receive_data( const boost::system::error_code& ec, std::size_t recvsize, unsigned int datasize );
+      void updateData( void );
+
+      //Gyro Applications
+      void configureOutput( TxInterval interval, OutputMode mode );
+      void resetAngle( double new_angle );
+      bool configureInternalCalculator( bool isEnable );
+      AnalogAngleRange setAnalogAngleRange( AnalogAngleRange target );
+      AnalogYawrateRange setAnalogYawrateRange( AnalogYawrateRange target );
+
+      //Callback
+      void callback_srv_control_output(
+        const std::shared_ptr<rmw_request_id_t> req_header,
+        const std::shared_ptr<japan_aeronautical_electronics_msgs::srv::Jg35fdControlOutput_Request> req,
+        const std::shared_ptr<japan_aeronautical_electronics_msgs::srv::Jg35fdControlOutput_Response> res
+      );
+      void callback_srv_calibrate_bias_drift(
+        const std::shared_ptr<rmw_request_id_t> req_header,
+        const std::shared_ptr<japan_aeronautical_electronics_msgs::srv::Jg35fdCalibrateBiasDrift_Request> req,
+        const std::shared_ptr<japan_aeronautical_electronics_msgs::srv::Jg35fdCalibrateBiasDrift_Response> res
+      );
+      void callback_srv_control_calculate(
+        const std::shared_ptr<rmw_request_id_t> req_header,
+        const std::shared_ptr<japan_aeronautical_electronics_msgs::srv::Jg35fdControlCalculate_Request> req,
+        const std::shared_ptr<japan_aeronautical_electronics_msgs::srv::Jg35fdControlCalculate_Response> res
+      );
+      void callback_srv_reset_angle(
+        const std::shared_ptr<rmw_request_id_t> req_header,
+        const std::shared_ptr<japan_aeronautical_electronics_msgs::srv::Jg35fdResetAngle_Request> req,
+        const std::shared_ptr<japan_aeronautical_electronics_msgs::srv::Jg35fdResetAngle_Response> res
+      );
+      void callback_srv_set_analog_range(
+        const std::shared_ptr<rmw_request_id_t> req_header,
+        const std::shared_ptr<japan_aeronautical_electronics_msgs::srv::Jg35fdSetAnalogRange_Request> req,
+        const std::shared_ptr<japan_aeronautical_electronics_msgs::srv::Jg35fdSetAnalogRange_Response> res
+      );
+      void callback_srv_set_analog_yawrate_range(
+        const std::shared_ptr<rmw_request_id_t> req_header,
+        const std::shared_ptr<japan_aeronautical_electronics_msgs::srv::Jg35fdSetAnalogYawrateRange_Request> req,
+        const std::shared_ptr<japan_aeronautical_electronics_msgs::srv::Jg35fdSetAnalogYawrateRange_Response> res
+      );
   };
 }
 
