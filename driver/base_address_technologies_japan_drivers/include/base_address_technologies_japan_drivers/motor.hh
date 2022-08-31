@@ -18,10 +18,14 @@
 #include <string>
 #include <tuple>
 
+using namespace std::literals::chrono_literals;
+
+
 namespace shipcon::device::base_address_technologies_japan
 {
   class CppMotor : public rclcpp::Node
   {
+
     /** Constants **/
     private:
       const uint16_t DATASIZE = 10; //Byte
@@ -30,6 +34,8 @@ namespace shipcon::device::base_address_technologies_japan
       const double PROP_MAX_ANGLE_ASTERN_DEG = 20.0;
       const std::string DEVELOPPER_NAME = "BASE ADDRESS TECHNOLOGIES JAPAN";
       const std::string DEVICE_TYPE = "CPP Motor Driver";
+      const std::chrono::milliseconds pubinfo_rate_ = 50ms;
+      const std::chrono::milliseconds sendctrl_rate_ = 100ms;
 
     /** Member Objects **/
     private:
@@ -37,8 +43,11 @@ namespace shipcon::device::base_address_technologies_japan
       uint16_t my_port_, device_port_;
       std::unique_ptr<hwcomlib::UdpSend> udp_send_;
       std::unique_ptr<hwcomlib::UdpRecv> udp_recv_;
-      std::unique_ptr<std::thread> threadptr_update_info_;
+
+      rclcpp::TimerBase::SharedPtr timerptr_pubinfo_timer_;
+      rclcpp::TimerBase::SharedPtr timerptr_sendcontrol_timer_;
       std::mutex mtx_;
+
       shipcon_msgs::msg::PropellerCommand prop_command_;
       shipcon_msgs::msg::MotorCommand motor_command_;
       shipcon_msgs::msg::PropellerInfo prop_info_;
@@ -59,6 +68,7 @@ namespace shipcon::device::base_address_technologies_japan
     public:
       void run( void );
     private:
+      void initParameterHandler( void );
       void initUdp( void );
       void initPublisher( void );
       void initSubscription( void );

@@ -16,14 +16,14 @@ namespace shipcon::device::base_address_technologies_japan
   
   CppMotor::~CppMotor()
   {
-    if( threadptr_update_info_->joinable() ){ threadptr_update_info_->join(); }
+    ;
   }
   
 
   void CppMotor::run( void )
   {
-    threadptr_update_info_ = std::make_unique<std::thread>( &CppMotor::thread_receiveUdp, this );
-    thread_sendControl();
+    timerptr_pubinfo_timer_ = create_wall_timer( pubinfo_rate_, std::bind( &CppMotor::thread_receiveUdp, this ) );
+    timerptr_sendcontrol_timer_ = create_wall_timer( sendctrl_rate_, std::bind( &CppMotor::thread_sendControl, this ) );
   }
 
 
@@ -66,12 +66,17 @@ namespace shipcon::device::base_address_technologies_japan
 
   void CppMotor::getNetworkParam( void )
   {
+    this->declare_parameter( "network/device_ip" );
+    this->declare_parameter( "network/device_ip_mask" );
+    this->declare_parameter( "network/my_port" );
+    this->declare_parameter( "network/device_port" );
+
     try
     {
-      device_ip_ = ( this->get_parameter( "network/device_ip" ) ).as_string();
-      device_ip_mask_ = ( this->get_parameter( "network/device_ip_mask" ) ).as_string();
-      my_port_ = static_cast<uint16_t>( ( this->get_parameter( "network/my_port" ) ).as_int() );
-      device_port_ = static_cast<uint16_t>( ( this->get_parameter( "network/device_port" ) ).as_int() );
+      device_ip_ = this->get_parameter( "network/device_ip" ).as_string();
+      device_ip_mask_ = this->get_parameter( "network/device_ip_mask" ).as_string();
+      my_port_ = static_cast<uint16_t>( this->get_parameter( "network/my_port" ).as_int() );
+      device_port_ = static_cast<uint16_t>( this->get_parameter( "network/device_port" ).as_int() );
     }
     catch( rclcpp::exceptions::ParameterNotDeclaredException )
     {
@@ -83,10 +88,13 @@ namespace shipcon::device::base_address_technologies_japan
 
   void CppMotor::getTopicParam( void )
   {
+    this->declare_parameter( "topicname/sub/motor_control" );
+    this->declare_parameter( "topicname/sub/propeller_control" );
+
     try
     {
-      subname_motor_control_ = ( this->get_parameter( "topicname/sub/motor_control" ) ).as_string();
-      subname_prop_control_ = ( this->get_parameter( "topicname/sub/propeller_control" ) ).as_string();
+      subname_motor_control_ = this->get_parameter( "topicname/sub/motor_control" ).as_string();
+      subname_prop_control_ = this->get_parameter( "topicname/sub/propeller_control" ).as_string();
     }
     catch( rclcpp::exceptions::ParameterNotDeclaredException )
     {
@@ -98,29 +106,22 @@ namespace shipcon::device::base_address_technologies_japan
 
   void CppMotor::thread_sendControl( void )
   {
-    while( rclcpp::ok() )
-    {
-      rclcpp::spin_some( this->get_node_base_interface() );
-      udp_send_->sendData( formSendData() );
-    }
+    udp_send_->sendData( formSendData() );
   }
 
 
   void CppMotor::thread_receiveUdp( void )
   {
-    while( rclcpp::ok() )
-    {
-      std::vector<char> buffer;
-      buffer.clear();
-      auto recvdata = udp_recv_->recvData( device_ip_, buffer );
+    std::vector<char> buffer;
+    buffer.clear();
+    auto recvdata = udp_recv_->recvData( device_ip_, buffer );
 
-      if( std::get<0>( recvdata ) == DATASIZE )
-      {
-        updateInfo( buffer );
-        evaluateInfo();
-        pub_motor_info_->publish( motor_info_ );
-        pub_prop_info_->publish( prop_info_ );
-      }
+    if( std::get<0>( recvdata ) == DATASIZE )
+    {
+      updateInfo( buffer );
+      evaluateInfo();
+      pub_motor_info_->publish( motor_info_ );
+      pub_prop_info_->publish( prop_info_ );
     }
   }
 
