@@ -7,15 +7,17 @@ namespace shipcon::device::japan_aeronautical_electronics
   rclcpp::Node( node_name, name_space )
   {
     //init ROS Service
-    initServiceParameter();
     initService();
 
+    //init Publisher
+    initPublisher();
+
     //init serial device
+    initSerialParameter();
     if ( initSerial() ){ serialif_->run(); }
 
     //init data variables
     data_buffer_.clear();
-    yaw_angle_ = 0.0;
 
     serialif_->dispatchRecvUntil(
       recv_buffer_,
@@ -35,34 +37,10 @@ namespace shipcon::device::japan_aeronautical_electronics
   }
 
 
-  void GyroJg35fd::initServiceParameter( void )
-  {
-    this->declare_parameter( "servicename/control_output" );
-    this->declare_parameter( "servicename/calibrate_bias_drift" );
-    this->declare_parameter( "servicename/control_calculate" );
-    this->declare_parameter( "servicename/reset_angle" );
-    this->declare_parameter( "servicename/set_analog_mode" );
-
-    try
-    {
-      srvname_control_output_ = this->get_parameter( "servicename/control_output" ).as_string();
-      srvname_calibrate_bias_drift_ = this->get_parameter( "servicename/calibrate_bias_drift" ).as_string();
-      srvname_control_calculate_ = this->get_parameter( "servicename/control_calculate" ).as_string();
-      srvname_reset_angle_ = this->get_parameter( "servicename/reset_angle" ).as_string();
-      srvname_set_analog_mode_ = this->get_parameter( "servicename/set_analog_mode" ).as_string();
-    }
-    catch( rclcpp::exceptions::ParameterNotDeclaredException )
-    {
-      RCLCPP_ERROR_STREAM( this->get_logger(), "Not set Service name in parameter!" );
-      rclcpp::shutdown();
-    }
-  }
-
-
   void GyroJg35fd::initService( void )
   {
     srv_control_output_ = create_service<japan_aeronautical_electronics_msgs::srv::Jg35fdControlOutput>(
-      srvname_control_output_,
+      ( std::string( this->get_name() ) + "/srv/control_output" ),
       std::bind(
         &GyroJg35fd::callback_srv_control_output,
         this,
@@ -73,7 +51,7 @@ namespace shipcon::device::japan_aeronautical_electronics
     );
     
     srv_calibrate_bias_drift_ = create_service<japan_aeronautical_electronics_msgs::srv::Jg35fdCalibrateBiasDrift>(
-      srvname_calibrate_bias_drift_,
+      ( std::string( this->get_name() ) + "/srv/calibrate_bias_drift" ),
       std::bind(
         &GyroJg35fd::callback_srv_calibrate_bias_drift,
         this,
@@ -84,7 +62,7 @@ namespace shipcon::device::japan_aeronautical_electronics
     );
   
     srv_control_calculate_ = create_service<japan_aeronautical_electronics_msgs::srv::Jg35fdControlCalculate>(
-      srvname_control_calculate_,
+      ( std::string( this->get_name() ) + "/srv/control_calculate" ),
       std::bind(
         &GyroJg35fd::callback_srv_control_calculate,
         this,
@@ -95,7 +73,7 @@ namespace shipcon::device::japan_aeronautical_electronics
     );
     
     srv_reset_angle_ = create_service<japan_aeronautical_electronics_msgs::srv::Jg35fdResetAngle>(
-      srvname_reset_angle_,
+      ( std::string( this->get_name() ) + "/srv/reset_angle" ),
       std::bind(
         &GyroJg35fd::callback_srv_reset_angle,
         this,
@@ -106,7 +84,7 @@ namespace shipcon::device::japan_aeronautical_electronics
     );
     
     srv_set_analog_mode_ = create_service<japan_aeronautical_electronics_msgs::srv::Jg35fdSetAnalogMode>(
-      srvname_set_analog_mode_,
+      ( std::string( this->get_name() ) + "/srv/set_analog_mode" ),
       std::bind(
         &GyroJg35fd::callback_srv_set_analog_mode,
         this,
@@ -114,6 +92,15 @@ namespace shipcon::device::japan_aeronautical_electronics
         std::placeholders::_2,
         std::placeholders::_3
       )
+    );
+  }
+
+
+  void GyroJg35fd::initPublisher( void )
+  {
+    pub_gyro_info_ = this->create_publisher<shipcon_msgs::msg::GyroInfo>(
+      "gyro_info",
+      rclcpp::QoS(0)
     );
   }
 
@@ -362,6 +349,10 @@ namespace shipcon::device::japan_aeronautical_electronics
   {
     uint16_t angle = 0;
     int16_t rate = 0;
+    shipcon_msgs::msg::GyroInfo gyroinfo;
+
+    gyroinfo.header.stamp = this->now();
+    gyroinfo.signal_status.status = shipcon_msgs::msg::SignalStatus::SIGNAL_NORMAL;
 
     if( data_buffer_[1] == 0x81 )
     {
@@ -369,9 +360,7 @@ namespace shipcon::device::japan_aeronautical_electronics
       if( checksum == data_buffer_[5] )
       {
         angle = static_cast<uint16_t>( data_buffer_[3] << 8 ) + data_buffer_[4];
-
-        std::lock_guard<std::mutex> lock(mtx_);
-        yaw_angle_ = static_cast<double>( angle ) / static_cast<double>( 0xffff ) * M_PI * 2;
+        gyroinfo.ang_yaw_rad = static_cast<double>( angle ) / static_cast<double>( 0xffff ) * M_PI * 2;
       }
     }
     else if( data_buffer_[1] == 0x82)
@@ -380,9 +369,7 @@ namespace shipcon::device::japan_aeronautical_electronics
       if( checksum == data_buffer_[5] )
       {
         rate = static_cast<int16_t>( data_buffer_[3] << 8 ) + data_buffer_[4];
-
-        std::lock_guard<std::mutex> lock(mtx_);
-        yaw_rate_ = static_cast<double>( rate ) / static_cast<double>( 0x7fff ) * unitcon::angle::deg2rad( 200.0 );
+        gyroinfo.vel_yaw_rad = static_cast<double>( rate ) / static_cast<double>( 0x7fff ) * unitcon::angle::deg2rad( 200.0 );
       }
     }
     else if( data_buffer_[1] == 0x83)
@@ -393,16 +380,22 @@ namespace shipcon::device::japan_aeronautical_electronics
         angle = static_cast<uint16_t>( data_buffer_[3] << 8 ) + data_buffer_[4];
         rate = static_cast<int16_t>( data_buffer_[5] << 8 ) + data_buffer_[6];
 
-        std::lock_guard<std::mutex> lock(mtx_);
-        yaw_angle_ = static_cast<double>( angle ) / static_cast<double>( 0xffff ) * M_PI * 2.0 ;
-        yaw_rate_ = static_cast<double>( rate ) / static_cast<double>( 0x7fff ) * unitcon::angle::deg2rad( 200.0 );
+        gyroinfo.ang_yaw_rad = static_cast<double>( angle ) / static_cast<double>( 0xffff ) * M_PI * 2.0 ;
+        gyroinfo.vel_yaw_rad = static_cast<double>( rate ) / static_cast<double>( 0x7fff ) * unitcon::angle::deg2rad( 200.0 );
       }
     }
+
+    pub_gyro_info_->publish( gyroinfo );
   
+
     data_buffer_.clear();
 
-    std::cout << "Yaw angle is " << std::fixed << std::setprecision(6) << yaw_angle_ << " rad" << std::endl;
-    std::cout << "Yaw rate is " << std::fixed << std::setprecision(6) << yaw_rate_ << " rad/s" << std::endl;
+    // std::stringstream ss1;
+    // ss1 << "Yaw angle is " << std::fixed << std::setprecision(6) << gyroinfo.ang_yaw_rad << " rad" << std::endl;
+    // RCLCPP_INFO_STREAM( this->get_logger(), ss1.str() );
+    // std::stringstream ss2;
+    // ss2 << "Yaw rate is " << std::fixed << std::setprecision(6) << gyroinfo.vel_yaw_rad << " rad/s" << std::endl;
+    // RCLCPP_INFO_STREAM( this->get_logger(), ss2.str() );
 
     serialif_->dispatchRecvUntil(
       recv_buffer_,
@@ -489,6 +482,7 @@ namespace shipcon::device::japan_aeronautical_electronics
   {
     std::stringstream ss;
     ss <<
+    std::uppercase <<
     std::setw(4) <<
     std::setfill('0') <<
     std::hex <<

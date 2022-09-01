@@ -12,6 +12,7 @@
   <depend>unit_convert_lib</depend>
   <depend>japan_aeronautical_electronics_msgs</depend>
   <depend>hardware_communication_lib</depend>
+  <depend>shipcon_msgs</depend>
   <depend>Boost</depend>
 
   <export>

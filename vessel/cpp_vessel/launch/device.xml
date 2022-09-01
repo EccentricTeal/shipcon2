@@ -7,4 +7,8 @@
     <param name="topicname/sub/motor_control" value="motor_control"/>
     <param name="topicname/sub/propeller_control" value="prop_control"/>
   </node>
+
+  <node namespace="cpp_vessel" name="gyro" pkg="japan_aeronautical_electronics_drivers" exec="jg35fd">
+    <param name="serial/port_name" value="/dev/ttyUSB0" />
+  </node>
 </launch>

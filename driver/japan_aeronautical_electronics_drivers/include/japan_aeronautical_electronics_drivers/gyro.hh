@@ -13,6 +13,8 @@
 #include "japan_aeronautical_electronics_msgs/srv/jg35fd_reset_angle.hpp"
 #include "japan_aeronautical_electronics_msgs/srv/jg35fd_set_analog_mode.hpp"
 
+//ROS Publisher
+#include "shipcon_msgs/msg/gyro_info.hpp"
 //STL
 #include <memory>
 #include <string>
@@ -49,18 +51,13 @@ namespace shipcon::device::japan_aeronautical_electronics
       rclcpp::Service<japan_aeronautical_electronics_msgs::srv::Jg35fdControlCalculate>::SharedPtr srv_control_calculate_;
       rclcpp::Service<japan_aeronautical_electronics_msgs::srv::Jg35fdResetAngle>::SharedPtr srv_reset_angle_;
       rclcpp::Service<japan_aeronautical_electronics_msgs::srv::Jg35fdSetAnalogMode>::SharedPtr srv_set_analog_mode_;
-      std::string srvname_control_output_;
-      std::string srvname_calibrate_bias_drift_;
-      std::string srvname_control_calculate_;
-      std::string srvname_reset_angle_;
-      std::string srvname_set_analog_mode_;
+
+      //ROS Publisher
+      rclcpp::Publisher<shipcon_msgs::msg::GyroInfo>::SharedPtr pub_gyro_info_;
       
       //Buffers
       boost::asio::streambuf recv_buffer_;
       std::vector<unsigned char> data_buffer_;
-      //Data
-      double yaw_angle_;
-      double yaw_rate_;
       //Utility
       std::mutex mtx_;
 
@@ -72,8 +69,10 @@ namespace shipcon::device::japan_aeronautical_electronics
     /* Private Methods */
     private:
       //ROS Service
-      void initServiceParameter( void );
       void initService( void );
+
+      //ROS Publisher
+      void initPublisher( void );
 
       //Serial Communication
       void initSerialParameter( void );

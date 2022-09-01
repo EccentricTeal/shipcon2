@@ -21,27 +21,29 @@ find_package(rclcpp REQUIRED)
 find_package(unit_convert_lib REQUIRED)
 find_package(japan_aeronautical_electronics_msgs REQUIRED)
 find_package(hardware_communication_lib REQUIRED)
+find_package(shipcon_msgs REQUIRED)
 find_package(Boost REQUIRED COMPONENTS regex)
 
-add_executable(node
+add_executable(jg35fd
   src/gyro/jg35fd.cc
   src/gyro/jg35fd_node.cc
 )
-ament_target_dependencies(node
+ament_target_dependencies(jg35fd
   rclcpp
   unit_convert_lib
   japan_aeronautical_electronics_msgs
   hardware_communication_lib
+  shipcon_msgs
   Boost
 )
-target_include_directories(node
+target_include_directories(jg35fd
   PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
 )
 
 install(
-  TARGETS node
+  TARGETS jg35fd
   DESTINATION lib/${PROJECT_NAME}
 )
 
