@@ -38,7 +38,23 @@ target_include_directories(motor_cpp
     $<INSTALL_INTERFACE:include>
 )
 
-install(TARGETS motor_cpp
+add_executable(motor_normal
+  src/motor/normal_motor.cc
+  src/motor/normal_motor_node.cc
+)
+ament_target_dependencies(motor_normal
+  rclcpp
+  hardware_communication_lib
+  shipcon_msgs
+  unit_convert_lib
+)
+target_include_directories(motor_normal
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+
+install(TARGETS motor_cpp motor_normal
   DESTINATION lib/${PROJECT_NAME}
   #RUNTIME DESTINATION bin
 )
