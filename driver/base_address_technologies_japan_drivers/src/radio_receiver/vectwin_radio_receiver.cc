@@ -6,7 +6,6 @@ namespace shipcon::device::base_address_technologies_japan
   rclcpp::Node( node_name, name_space )
   {
     getNetworkParam();
-
     initUdp();
     initPublisher();
   }

@@ -20,8 +20,6 @@
 
 namespace shipcon::device::base_address_technologies_japan
 {
-  using namespace std::literals::chrono_literals;
-
   class VectwinRadioReceiver : public rclcpp::Node
   { 
     /** Constants **/
@@ -29,7 +27,6 @@ namespace shipcon::device::base_address_technologies_japan
       const uint16_t DATASIZE = 10; //Byte
       const std::string DEVELOPPER_NAME = "BASE ADDRESS TECHNOLOGIES JAPAN";
       const std::string DEVICE_TYPE = "Vectwin Radio Receiver";
-      const std::chrono::milliseconds pubinfo_rate_ = 50ms;
 
     /** Member Objects **/
     private:
@@ -39,7 +36,6 @@ namespace shipcon::device::base_address_technologies_japan
       std::unique_ptr<hwcomlib::UdpRecv> udp_recv_;
 
       std::unique_ptr<std::thread> threadptr_pub_info_;
-      rclcpp::TimerBase::SharedPtr timerptr_sendcontrol_timer_;
       std::mutex mtx_;
 
       base_address_technologies_japan_msgs::msg::RadioReceiverStatus status_;

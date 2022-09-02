@@ -87,7 +87,7 @@ ament_target_dependencies(vectwin_radio_receiver
 target_include_directories(vectwin_radio_receiver
   PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<INSTALL_INTERF
+    $<INSTALL_INTERFACE:include>
 )
 
 install(TARGETS
