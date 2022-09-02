@@ -61,7 +61,6 @@ namespace shipcon::device::base_address_technologies_japan
     public:
       void run( void );
     private:
-      void initParameterHandler( void );
       void initUdp( void );
       void initPublisher( void );
       void initSubscription( void );
