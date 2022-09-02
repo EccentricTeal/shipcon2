@@ -22,39 +22,55 @@ find_package(hardware_communication_lib REQUIRED)
 find_package(shipcon_msgs REQUIRED)
 find_package(unit_convert_lib REQUIRED)
 
-add_executable(motor_cpp
+add_executable(cpp_motor
   src/motor/cpp_motor.cc
   src/motor/cpp_motor_node.cc
 )
-ament_target_dependencies(motor_cpp
+ament_target_dependencies(cpp_motor
   rclcpp
   hardware_communication_lib
   shipcon_msgs
   unit_convert_lib
 )
-target_include_directories(motor_cpp
+target_include_directories(cpp_motor
   PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
 )
 
-add_executable(motor_normal
+add_executable(normal_motor
   src/motor/normal_motor.cc
   src/motor/normal_motor_node.cc
 )
-ament_target_dependencies(motor_normal
+ament_target_dependencies(normal_motor
   rclcpp
   hardware_communication_lib
   shipcon_msgs
   unit_convert_lib
 )
-target_include_directories(motor_normal
+target_include_directories(normal_motor
   PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
 )
 
-install(TARGETS motor_cpp motor_normal
+add_executable(vectwin_rudder
+  src/rudder/vectwin_rudder.cc
+  src/rudder/vectwin_rudder_node.cc
+)
+ament_target_dependencies(vectwin_rudder
+  rclcpp
+  hardware_communication_lib
+  shipcon_msgs
+  unit_convert_lib
+)
+target_include_directories(vectwin_rudder
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+
+install(TARGETS cpp_motor normal_motor vectwin_rudder
   DESTINATION lib/${PROJECT_NAME}
   #RUNTIME DESTINATION bin
 )

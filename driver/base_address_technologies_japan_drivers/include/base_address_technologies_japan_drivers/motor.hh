@@ -19,11 +19,10 @@
 #include <string>
 #include <tuple>
 
-using namespace std::literals::chrono_literals;
-
-
 namespace shipcon::device::base_address_technologies_japan
 {
+  using namespace std::literals::chrono_literals;
+  
   class CppMotor : public rclcpp::Node
   {
     /** Constants **/

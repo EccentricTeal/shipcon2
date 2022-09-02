@@ -1,6 +1,6 @@
 <launch>
 
-  <node namespace="cpp_vessel" name="motor" pkg="base_address_technologies_japan_drivers" exec="motor_cpp">
+  <node namespace="cpp_vessel" name="motor" pkg="base_address_technologies_japan_drivers" exec="cpp_motor">
     <param name="network/device_ip" value="192.168.39.11"/>
     <param name="network/device_ip_mask" value="255.255.255.0"/>
     <param name="network/my_port" value="50000"/>
@@ -9,12 +9,20 @@
     <param name="topicname/sub/propeller_control" value="prop_control"/>
   </node>
 
-  <node namespace="cpp_vessel" name="bow_thruster" pkg="base_address_technologies_japan_drivers" exec="motor_normal">
+  <node namespace="cpp_vessel" name="bow_thruster" pkg="base_address_technologies_japan_drivers" exec="normal_motor">
     <param name="network/device_ip" value="192.168.39.13"/>
     <param name="network/device_ip_mask" value="255.255.255.0"/>
     <param name="network/my_port" value="50000"/>
     <param name="network/device_port" value="50003"/>
     <param name="topicname/sub/motor_control" value="bow_thruster_control"/>
+  </node>
+
+  <node namespace="cpp_vessel" name="rudders" pkg="base_address_technologies_japan_drivers" exec="vectwin_rudder">
+    <param name="network/device_ip" value="192.168.39.12"/>
+    <param name="network/device_ip_mask" value="255.255.255.0"/>
+    <param name="network/my_port" value="50000"/>
+    <param name="network/device_port" value="50003"/>
+    <param name="topicname/sub/rudder_control" value="vectwin_rudder_control"/>
   </node>
 
   <node namespace="cpp_vessel" name="gyro" pkg="japan_aeronautical_electronics_drivers" exec="jg35fd">
