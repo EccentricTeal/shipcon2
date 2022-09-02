@@ -25,6 +25,13 @@
     <param name="topicname/sub/rudder_control" value="vectwin_rudder_control"/>
   </node>
 
+  <node namespace="cpp_vessel" name="radio_receiver" pkg="base_address_technologies_japan_drivers" exec="vectwin_radio_receiver">
+    <param name="network/device_ip" value="192.168.39.15"/>
+    <param name="network/device_ip_mask" value="255.255.255.0"/>
+    <param name="network/my_port" value="50000"/>
+    <param name="network/device_port" value="50003"/>
+  </node>
+
   <node namespace="cpp_vessel" name="gyro" pkg="japan_aeronautical_electronics_drivers" exec="jg35fd">
     <param name="serial/port_name" value="/dev/ttyUSB0" />
   </node>
