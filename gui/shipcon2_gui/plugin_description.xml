@@ -1,0 +1,7 @@
+<library path="single_engine">
+  <class name="shipcon2_gui/single_engine" type="shipcon::gui::standard::SingleEnginePanel" base_class_type="rviz_common::Panel">
+    <description>
+      Shipcon2 GUI: Panel of single type engine.
+    </description>
+  </class>
+</library>
